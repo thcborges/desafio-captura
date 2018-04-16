@@ -16,7 +16,7 @@ class Connect:
 
     def commit_db(self):
         if self.conn:
-            self.commit_db()
+            self.conn.commit()
 
     def close_db(self):
         if self.conn:
