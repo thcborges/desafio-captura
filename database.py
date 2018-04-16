@@ -36,7 +36,40 @@ class Database:
         try:
             self.cursor.execute(schema)
         except sqlite3.Error as e:
-            print('Warining: table {} may already exists: {}'.format(self.table, e))
+            print('Warning: table {} may already exists: {}'.format(self.table, e))
 
     def close(self):
         self.db.close_db()
+
+    def insert_new_url(self, url):
+        try:
+            self.cursor.execute('INSERT INTO new_link (url) VALUES (?)', (url, ))
+            self.db.commit_db()
+        except sqlite3.Error as e:
+            print(e, url)
+
+    def __is_new(self, url):
+        try:
+            query = self.cursor.execute('SELECT COUNT(url) FROM new_link WHERE url = ?', (url, ))
+        except sqlite3.Error as e:
+            print(e, url)
+            return self.__is_new(url)
+        else:
+            result = query.fetchone()
+            return True if result[0] == 0 else False
+
+    def insert_url_list(self, url_list):
+        for url in url_list:
+            if self.__is_new(url):
+                self.insert_new_url(url)
+
+    def get_url(self, label):
+        try:
+            query = self.cursor.execute('SELECT url FROM new_link WHERE id = ?', (label, ))
+        except sqlite3.Error as e:
+            print(e, label)
+            return ''
+        else:
+            result = query.fetchone()
+            url = result[0] if result else ''
+            return url
