@@ -180,3 +180,13 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+### Pycharm files
+.idea/.name
+.idea/codeStyles/
+.idea/dbnavigator.xml
+.idea/desafio-captura.iml
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
