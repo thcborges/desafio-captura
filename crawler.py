@@ -95,7 +95,7 @@ class Crawler:
             return []
         else:
             soup = BeautifulSoup(page, 'html.parser')
-            if url[:2] == '/p':
+            if url[-2:] == '/p':
                 self.save_data(soup, url)
             url_list = []
             for tag_a in soup.find_all('a'):
