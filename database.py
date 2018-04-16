@@ -29,6 +29,17 @@ class Database:
         self.db = Connect(db_name)
         self.cursor = self.db.cursor
 
+    @property
+    def total(self):
+        try:
+            query = self.cursor.execute('SELECT COUNT(*) FROM new_link')
+        except sqlite3.Error as e:
+            print(e)
+            return ''
+        else:
+            total = query.fetchone()
+            return total[0]
+
     def create_schema(self):
         schema = ('CREATE TABLE IF NOT EXISTS new_link (\n'
                   '    id INTEGER PRIMARY KEY AUTOINCREMENT,\n'
