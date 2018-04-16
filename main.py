@@ -14,14 +14,13 @@ if __name__ == '__main__':
     database.create_schema()
     database.insert_new_url(crawler.main_url)
 
-    ident = 0
-    while ident < database.total:
-        ident += 1
-        link = database.get_url(ident)
-        link_list = crawler.get_links_list(link)
+    while database.has_unvisited():
+        url = database.get_unvisited_url()
+        link_list = crawler.get_links_list(url)
         database.insert_url_list(link_list)
+        database.set_visited(url)
         # show how many urls are missing to be verify
-        print(database.total - ident)
+        print(database.unvisited())
 
     database.close()
     os.remove('database.db')
