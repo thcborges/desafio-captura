@@ -53,11 +53,12 @@ class Database:
         self.db.close_db()
 
     def insert_new_url(self, url):
-        try:
-            self.cursor.execute('INSERT INTO new_link (url) VALUES (?)', (url, ))
-            self.db.commit_db()
-        except sqlite3.Error as e:
-            print(e, url)
+        if self.__is_new(url):
+            try:
+                self.cursor.execute('INSERT INTO new_link (url) VALUES (?)', (url, ))
+                self.db.commit_db()
+            except sqlite3.Error as e:
+                print(e, url)
 
     def __is_new(self, url):
         try:
@@ -71,8 +72,7 @@ class Database:
 
     def insert_url_list(self, url_list):
         for url in url_list:
-            if self.__is_new(url):
-                self.insert_new_url(url)
+            self.insert_new_url(url)
 
     def get_url(self, label):
         try:
