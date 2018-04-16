@@ -190,3 +190,8 @@ $RECYCLE.BIN/
 .idea/misc.xml
 .idea/modules.xml
 .idea/vcs.xml
+
+
+### database files
+/database.db
+/database.db-journal
