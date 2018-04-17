@@ -108,6 +108,6 @@ class Crawler:
     def save_data(self, soup, url):
         title = soup.find('title').string
         h1 = soup.find('h1')
-        product_name = h1.contents[0].string
+        product_name = h1.contents[0].string if h1 else ''
         page_values = PageValues(product_name, title, url)
         page_values.save_csv()
