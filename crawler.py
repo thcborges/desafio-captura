@@ -62,25 +62,29 @@ class Crawler:
         self.__csv_file_name = file_name
 
     def __verify(self, href):
-        # TODO
-        main = self.main_url.replace('https://', '')
+        # change main url to avoid mistakes with http ou https
+        main = self.main_url.replace('https://', '').replace('http://', '')
+        # forbidden possible urls
+        forbiden = {"#", 'None'}
 
-        if href == "#":
+        if (href is None) or (href in forbiden):
             return False
-        if href is None:
-            return False
-        if href == 'None':
-            return False
-        if 'tel:' in href or 'mailto:' in href:
-            return False
+
+        # verify if is a link to telephone, e-mail or javascript
+        for item in ['tel:', 'mailto:', 'javascript:']:
+            if item in href:
+                return False
+
+        # prevents a purchase from being made
         if main in href and ("/checkout/cart/add" in href or "/checkout/#/cart" in href):
             return False
-        elif "javascript" in href:
-            return False
+
+        # possible cases of a valid link
         elif main in href:
             return True
-        elif main not in str(href) and href[:4] != "http":
+        elif main not in href and href[:4] != "http":
             return True
+        # any other link is not valid
         else:
             return False
 
