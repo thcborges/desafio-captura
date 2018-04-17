@@ -7,14 +7,11 @@ from urllib import request, parse
 from bs4 import BeautifulSoup
 
 
-MAIN = 'https://www.epocacosmeticos.com.br'
-
-
 class PageValues:
-    def __init__(self, product_name, title, url):
+    def __init__(self, product_name, title, url, csv_file_name):
         self.__values = {'product_name': product_name, 'title': title, 'url': url}
         self.__csv_fields = self.__values.keys()
-        self.__csv_file_name = MAIN.replace('https://www.', '').replace('.', '-') + '.csv'
+        self.__csv_file_name = csv_file_name
 
     @property
     def url(self):
@@ -55,8 +52,9 @@ class PageValues:
 
 
 class Crawler:
-    def __init__(self, main_url):
+    def __init__(self, main_url, file_name):
         self.main_url = main_url
+        self.__csv_file_name = file_name + '.csv'
 
     def __verify(self, href):
         # TODO
@@ -87,27 +85,43 @@ class Crawler:
         else:
             return url
 
-    def get_links_list(self, url):
+    @staticmethod
+    def __open_page(url):
         try:
             page = request.urlopen(url)
         except Exception as e:
             print(e, url)
-            return []
+            return ''
         else:
-            soup = BeautifulSoup(page, 'html.parser')
-            if url[-2:] == '/p':
-                self.save_data(soup, url)
+            return page
+
+    def __url_list(self, page):
             url_list = []
-            for tag_a in soup.find_all('a'):
+            for tag_a in page.find_all('a'):
                 href = str(tag_a.get('href'))
                 if self.__verify(href):
                     url = parse.quote(self.__add_main_site(href), '/:#')
                     url_list.append(url)
             return url_list
 
+    def get_links_list(self, url):
+        page = self.get_page(url)
+        return self.__url_list(page)
+
+    def get_page(self, url):
+        page = self.__open_page(url)
+        soup = BeautifulSoup(page, 'html.parser')
+        return soup
+
+    def get_product_urls(self, page):
+        return self.__url_list(page)
+
     def save_data(self, soup, url):
         title = soup.find('title').string
         h1 = soup.find('h1')
-        product_name = h1.contents[0].string if h1 else ''
-        page_values = PageValues(product_name, title, url)
-        page_values.save_csv()
+        if h1:
+            product_name = h1.contents[0].string
+            page_values = PageValues(product_name, title, url, self.__csv_file_name)
+            page_values.save_csv()
+        else:
+            print('It was not possible to open {}'.format(url))
