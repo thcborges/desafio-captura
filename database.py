@@ -95,6 +95,17 @@ class Database:
             url = result[0] if result else ''
             return url
 
+    def get_unvisited_product(self):
+        try:
+            query = self.cursor.execute('SELECT url FROM new_link WHERE visited = 0 AND url like "%/p" LIMIT 1;')
+        except sqlite3.Error as e:
+            print(e)
+            return ''
+        else:
+            result = query.fetchone()
+            url = result[0] if result else ''
+            return url
+
     def unvisited(self):
         try:
             query = self.cursor.execute('SELECT COUNT(*) FROM new_link WHERE visited = 0')
@@ -105,5 +116,18 @@ class Database:
             amount = result[0]
             return amount
 
+    def unvisited_product(self):
+        try:
+            query = self.cursor.execute('SELECT COUNT(*) FROM new_link WHERE visited = 0 AND url LIKE "%/p"')
+        except sqlite3.Error as e:
+            print(e)
+        else:
+            result = query.fetchone()
+            amount = result[0]
+            return amount
+
     def has_unvisited(self):
         return True if self.unvisited() > 0 else False
+
+    def has_unvisited_product(self):
+        return True if self.unvisited_product() > 0 else False
