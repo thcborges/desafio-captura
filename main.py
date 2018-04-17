@@ -79,7 +79,13 @@ if __name__ == '__main__':
     main = Main(MAIN)
     try:
         main.search_for_products()
+        print('search completed')
     except KeyboardInterrupt:
+        print('Keyboard Interrupt received.')
         print('Stopping search.')
+    except Exception as e:
+        print(e)
+        print('It was not possible read all url found. Please, try again.')
+        print('The program is able to resume where it stopped.')
     finally:
         main.close_database()
