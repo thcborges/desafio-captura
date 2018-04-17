@@ -8,50 +8,66 @@ from crawler import Crawler
 from database import Database
 
 
-MAIN = 'https://www.epocacosmeticos.com.br'
+MAIN = {'url': 'https://www.epocacosmeticos.com.br', 'product_pattern': '%/p'}
 
 
 class Main:
-    def __init__(self, main_url, database_file):
-        self.main_url = main_url
-        self.crawler = Crawler(self.main_url, self.main_url.replace('https://www.', '').replace('.', '-'))
-        self.database_file = database_file
-        self.database = Database(self.database_file)
-        self.database.create_schema()
-        self.database.insert_new_url(self.main_url)
+    def __init__(self, params):
+        self.__main_url = params['url']
+        self.__file_name = self.__main_url.replace('https://www.', '').replace('.', '-')
+        self.__crawler = Crawler(self.__main_url, self.csv_file_name)
+        self.__database = Database(self.database_file_name, params['product_pattern'])
+        self.__database.create_schema()
+        self.__database.insert_new_url(self.__main_url)
+
+    @property
+    def main_url(self):
+        return self.__main_url
+
+    @property
+    def database_file_name(self):
+        return self.__file_name + '.db'
+
+    @property
+    def csv_file_name(self):
+        return self.__file_name + '.csv'
 
     def search_for_products(self):
-        while self.database.has_unvisited():
-            if self.database.has_unvisited_product():
+        while self.__database.has_unvisited():
+            if self.__database.has_unvisited_product():
                 self.__search_in_product_url()
             else:
                 self.__search_in_not_product_url()
 
     def __search_in_product_url(self):
-        url = self.database.get_unvisited_product()
-        page = self.crawler.get_page(url)
-        self.crawler.save_data(page, url)
-        url_list = self.crawler.get_product_urls(page)
-        self.database.set_visited(url)
-        self.database.insert_url_list(url_list)
+        url = self.__database.get_unvisited_product()
+        page = self.__crawler.get_page(url)
+        self.__crawler.save_data(page, url)
+        url_list = self.__crawler.get_product_urls(page)
+        self.__database.set_visited(url)
+        self.__database.insert_url_list(url_list)
 
     def __search_in_not_product_url(self):
-        url = self.database.get_unvisited_url()
-        url_list = self.crawler.get_links_list(url)
-        self.database.set_visited(url)
-        self.database.insert_url_list(url_list)
+        url = self.__database.get_unvisited_url()
+        url_list = self.__crawler.get_links_list(url)
+        self.__database.set_visited(url)
+        self.__database.insert_url_list(url_list)
 
     def close_database(self):
-        self.database.close()
+        self.__database.close()
         self.__delete_database()
 
     def __delete_database(self):
         if self.__confirmation('Would you want to delete the database [Y/N]? '):
-            os.remove(self.database_file)
+            try:
+                os.remove(self.database_file_name)
+            except os.error as e:
+                print('It was not possible delete database file.')
+                print(e)
 
     def __confirmation(self, message):
         answer = input(message)
-        if answer.upper() != 'Y' or answer.upper() != 'N':
+        if answer.upper() != 'Y' and answer.upper() != 'N':
             print('It was not possible understand your answer, please try again.')
             return self.__confirmation(message)
         elif answer.upper() == 'Y':
@@ -60,7 +76,7 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main(MAIN, 'database.db')
+    main = Main(MAIN)
     try:
         main.search_for_products()
     except KeyboardInterrupt:
