@@ -61,5 +61,9 @@ class Main:
 
 if __name__ == '__main__':
     main = Main(MAIN, 'database.db')
-    main.search_for_products()
-    main.close_database()
+    try:
+        main.search_for_products()
+    except KeyboardInterrupt:
+        print('Stopping search.')
+    finally:
+        main.close_database()
