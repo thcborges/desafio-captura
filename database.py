@@ -10,10 +10,11 @@ class Connect:
     def __init__(self, db_name):
         try:
             self.conn = sqlite3.connect(db_name)
-            self.cursor = self.conn.cursor()
         except sqlite3.Error as e:
             print('Error. It was not possible open database: {}'.format(e))
             exit(1)
+        else:
+            self.cursor = self.conn.cursor()
 
     def commit_db(self):
         if self.conn:
@@ -25,21 +26,11 @@ class Connect:
 
 
 class Database:
-    def __init__(self, db_name):
+    def __init__(self, db_name, product_pattern):
         self.table = 'new_link'
         self.db = Connect(db_name)
         self.cursor = self.db.cursor
-
-    @property
-    def total(self):
-        try:
-            query = self.cursor.execute('SELECT COUNT(*) FROM new_link')
-        except sqlite3.Error as e:
-            print(e)
-            return ''
-        else:
-            total = query.fetchone()
-            return total[0]
+        self.product_pattern = product_pattern
 
     def create_schema(self):
         schema = ('CREATE TABLE IF NOT EXISTS new_link (\n'
@@ -53,81 +44,77 @@ class Database:
     def close(self):
         self.db.close_db()
 
-    def insert_new_url(self, url):
-        if self.__is_new(url):
-            try:
-                self.cursor.execute('INSERT INTO new_link (url) VALUES (?);', (url, ))
-                self.db.commit_db()
-            except sqlite3.Error as e:
-                print(e, url)
+    def __read_database(self, query, values):
+        try:
+            answer = self.cursor.execute(query, values)
+        except sqlite3.Error as e:
+            print(e)
+            time.sleep(0.5)
+            return self.__read_database(query, values)
+        return answer
+
+    def __fetchone(self, query, values):
+        data = self.__read_database(query, values)
+        answer = data.fetchone()
+        if answer:
+            return answer[0]
+        return None
+
+    def total(self):
+        query = 'SELECT COUNT(*) FROM new_link'
+        result = self.__fetchone(query, ())
+        return result if result else self.total()
 
     def __is_new(self, url):
-        try:
-            query = self.cursor.execute('SELECT COUNT(*) FROM new_link WHERE url = ?;', (url, ))
-        except sqlite3.Error as e:
-            print(e, url)
-            return self.__is_new(url)
-        else:
-            result = query.fetchone()
-            if result:
-                return True if result[0] == 0 else False
-            return False
-
-    def insert_url_list(self, url_list):
-        for url in url_list:
-            self.insert_new_url(url)
-
-    def set_visited(self, url):
-        try:
-            self.cursor.execute('UPDATE new_link SET visited = 1 WHERE url = ?;', (url, ))
-            self.db.commit_db()
-        except sqlite3.Error as e:
-            print(e, url)
+        query = 'SELECT COUNT(*) FROM new_link WHERE url = ?;'
+        result = self.__fetchone(query, (url, ))
+        return True if result == 0 else False
 
     def get_unvisited_url(self):
-        try:
-            query = self.cursor.execute('SELECT url FROM new_link WHERE visited = 0 LIMIT 1;')
-        except sqlite3.Error as e:
-            print(e)
-            return ''
-        else:
-            result = query.fetchone()
-            url = result[0] if result else ''
-            return url
+        query = 'SELECT url FROM new_link WHERE visited = 0 LIMIT 1;'
+        result = self.__fetchone(query, ())
+        return result if result else self.get_unvisited_url()
 
     def get_unvisited_product(self):
-        try:
-            query = self.cursor.execute('SELECT url FROM new_link WHERE visited = 0 AND url like "%/p" LIMIT 1;')
-        except sqlite3.Error as e:
-            print(e)
-            return ''
-        else:
-            result = query.fetchone()
-            url = result[0] if result else ''
-            return url
+        query = 'SELECT url FROM new_link WHERE visited = 0 AND url like ? LIMIT 1;'
+        result = self.__fetchone(query, (self.product_pattern, ))
+        return result if result else self.get_unvisited_product()
 
     def unvisited(self):
-        try:
-            query = self.cursor.execute('SELECT COUNT(*) FROM new_link WHERE visited = 0')
-        except sqlite3.Error as e:
-            print(e)
-        else:
-            result = query.fetchone()
-            amount = result[0]
-            return amount
+        query = 'SELECT COUNT(*) FROM new_link WHERE visited = 0'
+        result = self.__fetchone(query, ())
+        return result if result is not None else self.unvisited()
 
     def unvisited_product(self):
-        try:
-            query = self.cursor.execute('SELECT COUNT(*) FROM new_link WHERE visited = 0 AND url LIKE "%/p"')
-        except sqlite3.Error as e:
-            print(e)
-        else:
-            result = query.fetchone()
-            amount = result[0]
-            return amount
+        query = 'SELECT COUNT(*) FROM new_link WHERE visited = 0 AND url LIKE ?'
+        result = self.__fetchone(query, (self.product_pattern, ))
+        return result if result is not None else self.unvisited_product()
 
     def has_unvisited(self):
         return True if self.unvisited() > 0 else False
 
     def has_unvisited_product(self):
         return True if self.unvisited_product() > 0 else False
+
+    def __write_database(self, statement, values):
+        try:
+            self.cursor.execute(statement, values)
+        except sqlite3.Error as e:
+            print('Error writing in the database.')
+            print(e)
+            if str(e) == 'database is locked':
+                time.sleep(0.5)
+                self.__write_database(statement, values)
+
+    def insert_new_url(self, url):
+        if self.__is_new(url):
+            statement = 'INSERT INTO new_link (url) VALUES (?);'
+            self.__write_database(statement, (url, ))
+
+    def insert_url_list(self, url_list):
+        for url in url_list:
+            self.insert_new_url(url)
+
+    def set_visited(self, url):
+        statement = 'UPDATE new_link SET visited = 1 WHERE url = ?;'
+        self.__write_database(statement, (url, ))
