@@ -3,6 +3,7 @@
 
 
 import csv
+import time
 from urllib import request, parse
 from bs4 import BeautifulSoup
 
@@ -41,9 +42,13 @@ class PageValues:
     def save_csv(self):
         if not self.__is_csv():
             self.__create_csv()
-        with open(self.__csv_file_name, 'a', newline='', encoding='utf-8') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=self.__csv_fields, delimiter=';')
-            writer.writerow(self.__values)
+        try:
+            with open(self.__csv_file_name, 'a', newline='', encoding='utf-8') as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=self.__csv_fields, delimiter=';')
+                writer.writerow(self.__values)
+        except IOError:
+            time.sleep(0.5)
+            self.save_csv()
 
         # display on the screen what is being record on csv
         print('{} PAGE VALUES {}'.format('=' * 10, '=' * 10))
@@ -54,7 +59,7 @@ class PageValues:
 class Crawler:
     def __init__(self, main_url, file_name):
         self.main_url = main_url
-        self.__csv_file_name = file_name + '.csv'
+        self.__csv_file_name = file_name
 
     def __verify(self, href):
         # TODO
