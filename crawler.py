@@ -38,14 +38,14 @@ class PageValues:
 
     def __create_csv(self):
         with open(self.__csv_file_name, 'w', newline='', encoding='utf-8') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=self.__csv_fields)
+            writer = csv.DictWriter(csv_file, fieldnames=self.__csv_fields, delimiter=';')
             writer.writeheader()
 
     def save_csv(self):
         if not self.__is_csv():
             self.__create_csv()
         with open(self.__csv_file_name, 'a', newline='', encoding='utf-8') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=self.__csv_fields)
+            writer = csv.DictWriter(csv_file, fieldnames=self.__csv_fields, delimiter=';')
             writer.writerow(self.__values)
 
         # display on the screen what is being record on csv
