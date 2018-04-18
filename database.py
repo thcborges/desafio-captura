@@ -96,9 +96,15 @@ class Database:
     def has_unvisited_product(self):
         return True if self.unvisited_product() > 0 else False
 
+    def total_products(self):
+        query = 'SELECT COUNT(*) FROM new_link WHERE url LIKE ?'
+        result = self.__fetchone(query, (self.product_pattern, ))
+        return result if result is not None else self.total_products()
+
     def __write_database(self, statement, values):
         try:
             self.cursor.execute(statement, values)
+            self.db.commit_db()
         except sqlite3.Error as e:
             print('Error writing in the database.')
             print(e)

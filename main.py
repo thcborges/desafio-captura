@@ -36,11 +36,13 @@ class Main:
         return self.__file_name + '.csv'
 
     def search_for_products(self):
+        self.show_status()
         while self.__database.has_unvisited():
             if self.__database.has_unvisited_product():
                 self.__search_in_product_url()
             else:
                 self.__search_in_not_product_url()
+                self.show_status()
 
     def __search_in_product_url(self):
         url = self.__database.get_unvisited_product()
@@ -58,9 +60,8 @@ class Main:
 
     def close_database(self):
         self.__database.close()
-        self.__delete_database()
 
-    def __delete_database(self):
+    def delete_database(self):
         if self.__confirmation('Would you want to delete the database [Y/N]? '):
             try:
                 os.remove(self.database_file_name)

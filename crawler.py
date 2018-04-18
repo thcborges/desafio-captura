@@ -51,9 +51,8 @@ class PageValues:
             self.save_csv()
 
         # display on the screen what is being record on csv
-        print('{} PAGE VALUES {}'.format('=' * 10, '=' * 10))
         for key, value in self.__values.items():
-            print('{}: {}'.format(key, value))
+            print('{}: {}'.format(key, value), end='; ' if key != 'url' else '\n')
 
 
 class Crawler:
