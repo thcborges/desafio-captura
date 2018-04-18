@@ -8,7 +8,10 @@ from crawler import Crawler
 from database import Database
 
 
-MAIN = {'url': 'https://www.epocacosmeticos.com.br', 'product_pattern': '%/p'}
+MAIN = {
+    'url': 'https://www.epocacosmeticos.com.br',
+    'product_pattern': 'https://www.epocacosmeticos.com.br%/p'
+}
 
 
 class Main:
@@ -74,6 +77,24 @@ class Main:
             return True
         return False
 
+    def show_status(self):
+        total = self.__database.total()
+        total_unvisited = self.__database.unvisited()
+        products = self.__database.total_products()
+        products_unvisted = self.__database.unvisited_product()
+        percent_total = (total - total_unvisited) / total * 100
+        percent_products = (products - products_unvisted) / products * 100
+        message = '{}| {} |{}\n'.format('=#' * 18, self.main_url, '#=' * 18)
+        message += 'Found URLs:\t\t{}\t'.format(total)
+        message += 'Unvisited URLs:\t\t\t{}\t'.format(total_unvisited)
+        message += 'Percent visited:\t\t{:.1f}\n'.format(percent_total)
+        message += 'Found products URLs:\t{}\t'.format(products)
+        message += 'Unvisited products URLs:\t{}\t'.format(products_unvisted)
+        message += 'Percent visited products:\t{:.1f}\n'.format(percent_products)
+        message += '{}=\n'.format('=#' * 55)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(message)
+
 
 if __name__ == '__main__':
     main = Main(MAIN)
@@ -83,9 +104,14 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print('Keyboard Interrupt received.')
         print('Stopping search.')
-    except Exception as e:
-        print(e)
+        input('Pressione ENTER para encerrar')
+        main.close_database()
+    except Exception as error:
+        print(error)
         print('It was not possible read all url found. Please, try again.')
         print('The program is able to resume where it stopped.')
-    finally:
+        input('Pressione ENTER para encerrar')
         main.close_database()
+    else:
+        main.close_database()
+        main.delete_database()
