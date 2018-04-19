@@ -84,7 +84,7 @@ class Main:
         products = self.__database.total_products()
         products_unvisted = self.__database.unvisited_product()
         percent_total = (total - total_unvisited) / total * 100
-        percent_products = (products - products_unvisted) / products * 100
+        percent_products = (products - products_unvisted) / products * 100 if products != 0 else 0
         message = '{}| {} |{}\n'.format('=#' * 18, self.main_url, '#=' * 18)
         message += 'Found URLs:\t\t{}\t'.format(total)
         message += 'Unvisited URLs:\t\t\t{}\t'.format(total_unvisited)
