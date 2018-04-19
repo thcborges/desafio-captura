@@ -93,15 +93,14 @@ class Crawler:
         else:
             return url
 
-    @staticmethod
-    def __open_page(url):
+    def __open_page(self, url):
         try:
             page = request.urlopen(url)
         except Exception as e:
             print(e, url)
             return ''
         else:
-            return page
+            return page if page is not None else self.__open_page(url)
 
     def __url_list(self, page):
             url_list = []
