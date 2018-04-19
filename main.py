@@ -5,27 +5,27 @@
 import os
 
 from crawler import Crawler
-from database import Database
+from database import URLDatabase
 
 
 MAIN = {
-    'url': 'https://www.epocacosmeticos.com.br',
+    'domain': 'https://www.epocacosmeticos.com.br',
     'product_pattern': 'https://www.epocacosmeticos.com.br%/p'
 }
 
 
 class Main:
     def __init__(self, params):
-        self.__main_url = params['url']
-        self.__file_name = self.__main_url.replace('https://www.', '').replace('.', '-')
-        self.__crawler = Crawler(self.__main_url, self.csv_file_name)
-        self.__database = Database(self.database_file_name, params['product_pattern'])
+        self.__domain = params['domain']
+        self.__file_name = self.__domain.replace('https://www.', '').replace('.', '-')
+        self.__crawler = Crawler(self.__domain, self.csv_file_name)
+        self.__database = URLDatabase(self.database_file_name, params['product_pattern'])
         self.__database.create_schema()
-        self.__database.insert_new_url(self.__main_url)
+        self.__database.insert_new_url(self.__domain)
 
     @property
-    def main_url(self):
-        return self.__main_url
+    def domain(self):
+        return self.__domain
 
     @property
     def database_file_name(self):

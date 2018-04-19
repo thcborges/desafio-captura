@@ -25,7 +25,7 @@ class Connect:
             self.conn.close()
 
 
-class Database:
+class URLDatabase:
     def __init__(self, db_name, product_pattern):
         self.table = 'new_link'
         self.db = Connect(db_name)

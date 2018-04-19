@@ -4,7 +4,7 @@
 
 import os
 from unittest import TestCase
-from database import Database
+from database import URLDatabase
 
 
 class MyTest(TestCase):
@@ -12,7 +12,7 @@ class MyTest(TestCase):
     def test_database(self):
         db_name = 'testsDb1.db'
         url = 'https://www.epocacosmeticos.com.br'
-        db = Database(db_name, 'https://www.epocacosmeticos.com.br%/p')
+        db = URLDatabase(db_name, 'https://www.epocacosmeticos.com.br%/p')
         db.create_schema()
 
         # checking if database is empty
