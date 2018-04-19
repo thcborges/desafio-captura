@@ -63,7 +63,7 @@ class Database:
     def total(self):
         query = 'SELECT COUNT(*) FROM new_link'
         result = self.__fetchone(query, ())
-        return result if result else self.total()
+        return result if result is not None else self.total()
 
     def __is_new(self, url):
         query = 'SELECT COUNT(*) FROM new_link WHERE url = ?;'
