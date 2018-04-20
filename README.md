@@ -29,11 +29,11 @@ os links são internos ou externos, excluindo os externos de serem acessados.
 
 Todos os links internos do site serão acessados e salvos em um banco de dados 
 local. Toda vez que uma url for acessada, o seu status no banco é alterado 
-para visitada, fazendo com que aquela url não seja mais visitada.
+para visitada, fazendo com que aquela url não seja mais acessada.
 
-Um padrão para as urls de produtos foi estipulado e a prioridade é o acesso 
-às urls de produtos. Ou seja, sempre que houver uma url de produto não acessada
-ela será acessada primeiro antes das demais urls.
+Um padrão para as urls de produtos foi estipulado e a prioridade é que essas 
+sejam acessadas primeiro. Ou seja, sempre que houver uma url de produto não 
+acessada ela será processada primeiro.
 
 Toda vez que uma url de produto for acessada, será salvo no arquivo `.csv` as 
 informações pedidas no desafio: nome do produto, título da página e url.
@@ -55,8 +55,8 @@ de dados.
     seria possível transformar `MAIN` (dicionário com chaves sendo `url` e 
     `product_pattern` do arquivo `main.py`) em uma lista de dicionários com
      chaves  `url` e `product_pattern`. 
-     Tendo feito isso, eu precisaria verificar o DOM de cada novo site, para verificar
-     se a forma como eu capturo o nome do produto continua válido.
+     Tendo feito isso, eu precisaria verificar o DOM de cada novo site, para 
+     verificar se a forma como eu capturo o nome do produto continua válido.
 
  - Alguns sites carregam o preço através de JavaScript. Como faria para
  capturar esse valor.
